@@ -1,162 +1,113 @@
-import React, { Component } from 'react'
-import './Signup/Signup.css'
-import {Button, InputGroup, Modal, ModalBody, ModalHeader} from "reactstrap";
-import DatePicker from "react-datepicker/es";
-import 'react-datepicker/dist/react-datepicker.css';
-import 'react-datepicker/dist/react-datepicker-cssmodules.css';
-import Input from "reactstrap/es/Input";
-import InputGroupAddon from "reactstrap/es/InputGroupAddon";
-import InputGroupText from "reactstrap/es/InputGroupText";
+import React, {Component} from 'react'
+import {Modal, ModalBody, ModalHeader} from "reactstrap";
+import '../style.css';
+import * as Constants from '../Constants';
+import {CATEGORY_TYPE_STRINGS} from "../Constants";
+import {AFFILIATION_TYPE_STRINGS} from "../Constants";
+import axios from 'axios';
 
-class SignUp extends Component{
+class PreRegister extends Component{
   constructor(props){
     super(props);
     this.state = {
       name: '',
-      id: '',
-      pw: '',
-      pw_again: '',
       email: '',
-      code: '',
-      birthday: '',
-      group: 1,
-
+      youtubeChannelName: '',
+      subscriberCount: null,
+      category: 100,
+      affiliation: 100,
+      affiliatedWith: '',
+      youtubeChannelURL: '',
       modelOpen: false,
-      pwIsValid: false,
-      pwCompare: false,
-
-      // UI상태 저장용
-      buttonPressed_email: false,
+      agreedToTerms: false
     }
   }
-
-  pwRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,20}$)");
-
-  handleChange = (e) => {
-    switch (e.target.name) {
-      case 'pw':
-        if (e.target.name === 'pw') {
-          if (this.pwRegex.test(e.target.value)) {
-            this.setState({
-              pw: e.target.value,
-              pwIsValid: true
-            });
-          }
-          else {
-            this.setState({
-              pw: e.target.value,
-              pwIsValid: false
-            });
-          }
-        }
-        break;
-
-      case 'pw_again':
-        if (e.target.value === this.state.pw) {
-          this.setState({
-            pw_again: e.target.value,
-            pwCompare: true
-          });
-        }
-        else {
-          this.setState({
-            pw_again: e.target.value,
-            pwCompare: false
-          });
-        }
-        break;
-
-      case 'id':
-        this.props.onIdValidation(0);
-        this.setState({
-          id: e.target.value
-        });
-        break;
-
-      default:
-        this.setState({
-          [e.target.name]: e.target.value
-        });
-        break;
-    }
-  };
 
   toggle = () => {
     this.setState({modalOpen: !this.state.modalOpen});
   };
 
-  handleClick_id = () => {
-    this.props.onConfirmId(this.state.id);
+  handleChange = (e) => {
+    switch(e.target.name) {
+      case 'name':
+        this.setState({name: e.target.value});
+        break;
+      case 'email':
+        this.setState({email: e.target.value});
+        break;
+      case 'channelname':
+        this.setState({youtubeChannelName: e.target.value});
+        break;
+      case 'subscribercount':
+        if (+e.target.value < 0 ) {
+          alert('구독자 수는 0명 이상이어야 합니다');
+          return;
+        }
+        this.setState({subscriberCount: +e.target.value});
+        break;
+      case 'category':
+        this.setState({category: +e.target.value});
+        break;
+      case 'affiliation':
+        this.setState({affiliation: +e.target.value});
+        if (+e.target.value === Constants.AFFILIATION_INDIVIDUAL) this.setState({affiliatedWith: ''});
+        break;
+      case 'affiliatedwith':
+        this.setState({affiliatedWith: e.target.value});
+        break;
+      case 'youtubeURL':
+        this.setState({youtubeChannelURL: e.target.value});
+        break;
+      default:
+        return;
+    }
   };
 
-  handleClick_email = () => {
-    this.props.onSendEmail(this.state.email+'@snu.ac.kr');
-    this.props.onEmailValidation(0);
-    this.setState({
-      buttonPressed_email: true
-    });
-  }
+  areAllFieldsEntered = () => {
+    const {name, email, youtubeChannelName, subscriberCount, category, affiliation, youtubeChannelURL} = this.state;
+    return name && email && youtubeChannelName && subscriberCount >= 0 && category !== 100 && affiliation !== 100 && youtubeChannelURL;
+  };
 
-  handleClick_code = () => {
-    this.props.onConfirmCode(this.state.code);
-    this.setState({
-      buttonPressed_code: true,
-    })
-  }
-
-  handleClick_signUp = () => {
-    const {name,id,pw,email, pwIsValid, pwCompare} = this.state;
-    const {idIsValid, emailIsValid} = this.props;
-    if(!(idIsValid && emailIsValid && pwIsValid && pwCompare)){
-      alert('입력하신 정보가 잘못되었거나 유효하지 않습니다. 다시 한 번 확인해 주세요.');
+  handleClick = async () => {
+    const {agreedToTerms} = this.state;
+    if (!agreedToTerms) {
+      alert('개인정보 이용약관에 동의해주시기 바랍니다.');
+      return;
     }
-    else {
-      try {
-        this.props.onSignUp(name,id,pw,email+'@snu.ac.kr');
-        alert("회원가입에 성공하였습니다.");
-        this.props.history.push("/login/");
-      } catch(e){
-        alert("회원가입 실패 :" + e.message);
-      }
+    if (!this.areAllFieldsEntered()) {
+      alert('사전등록에 필요한 정보를 완전히 기입해주시기 바랍니다.');
+      return;
     }
-  }
-
-  idUI = () => {
-    const {idIsValid} = this.props;
-    if(idIsValid===0) return <span className='check' style={{color:'blue'}}>아이디 중복체크를 완료해주세요.</span>
-    else if(idIsValid===1) return <span className='check' style={{color:'green'}}>유효한 아이디입니다.</span>
-    else return <span className='check' style={{color:'red'}}>유효하지 않거나 이미 가입된 아이디입니다.</span>
-  }
-
-  emailUI = () => {
-    const {emailSent} = this.props;
-    const {buttonPressed_email} = this.state;
-    const {codeUI} = this;
-    if(!buttonPressed_email) return;
-    else{
-      if(emailSent===0) return;
-      else if(emailSent===2) return <span style={{color:'red'}}>유효하지 않거나 중복된 이메일입니다.</span>
-      else return (
-          <div>
-            <input name='code' type='text' onChange={this.handleChange} />
-            <button type='button' onClick={this.handleClick_code}>인증</button>
-            {codeUI()}
-          </div>
-        )
+    try {
+      const data = {
+        ...this.state
+      };
+      delete data.modelOpen;
+      delete data.agreedToTerms;
+      await axios.post(`${Constants.API_URL}/preregister`, data)
+        .then(() => {
+          alert('성공적으로 사전등록이 되었습니다. 감사합니다.');
+          this.setState({
+            name: '',
+            email: '',
+            youtubeChannelName: '',
+            subscriberCount: '',
+            category: 100,
+            affiliation: 100,
+            affiliatedWith: '',
+            youtubeChannelURL: ''
+          })
+        })
+        .catch(err => {
+          alert(err.response.data.error)
+        });
+    } catch (e) {
+      alert(e.message);
     }
-  }
-
-  codeUI = () => {
-    const {emailIsValid} = this.props;
-    if(emailIsValid===0) return <span className='check' style={{color:'blue'}}>코드 인증을 완료해주세요.</span>
-    else if(emailIsValid===1) return <span className='check' style={{color:'green'}}>인증이 완료되었습니다.</span>
-    else return <span className='check' style={{color:'red'}}>인증에 실패하였습니다.</span>
-  }
+  };
 
   render(){
-    const {pw, pw_again, pwIsValid, pwCompare} = this.state;
-    console.log('state', this.state.group);
-    const {idUI, emailUI} = this;
+    const {name, email, youtubeChannelName, subscriberCount, category, affiliation, youtubeChannelURL, affiliatedWith} = this.state;
     return (
       <div className={'container-login106'} style={{backgroundColor: '#F8F8F8'}}>
         <br />
@@ -169,152 +120,51 @@ class SignUp extends Component{
         <br />
 
         <div style={{display: 'flex', flexDirection: 'column', marginLeft: '17em', width: '60%', alignItems: 'center', justifyContent: 'center'}}>
-          {/*<Input class={'form-control input'} id={'preregister-input'} name='id'  type='text' maxLength='20' placeholder='이름' onChange={this.handleChange} />*/}
 
-          <input className={'prereg-input'} placeholder={'이름'}/>
-
-          {/*<InputGroup className={'name'}>*/}
-            {/*/!*<InputGroupAddon addonType={'prepend'}>*!/*/}
-              {/*/!*<InputGroupText><i className="fa fa-birthday-cake" aria-hidden="true"></i></InputGroupText>*!/*/}
-            {/*/!*</InputGroupAddon>*!/*/}
-            {/*<Input class={'form-control input'} id={'preregister-input'} type='date' maxLength='20' placeholder='생년월일' onChange={this.handleChange} />*/}
-            {/*&nbsp;*/}
-            {/*/!*<InputGroupAddon addonType={'prepend'}>*!/*/}
-              {/*/!*<InputGroupText><i className="fa fa-venus-mars" aria-hidden="true"></i></InputGroupText>*!/*/}
-            {/*/!*</InputGroupAddon>*!/*/}
-            {/*<Input class={'form-control input'} id={'preregister-input'} type='select' maxLength='20' placeholder='성별' onChange={this.handleChange}>*/}
-              {/*<option>성별</option>*/}
-              {/*<option>남</option>*/}
-              {/*<option>녀</option>*/}
-              {/*<option>밝히고 싶지 않음</option>*/}
-            {/*</Input>*/}
-          {/*</InputGroup>*/}
-
-          {/*<div className='name'>*/}
-              {/*<span>*/}
-              {/*/!*<input className='name-input' name='name' type='text' maxLength='20' placeholder='생일' onChange={this.handleChange} />*!/*/}
-              {/*<DatePicker*/}
-                {/*selected={this.state.birthday}*/}
-                {/*// dateFormat={'Pp'}*/}
-                {/*onChange={date => this.setState({birthday: date})}*/}
-              {/*/>*/}
-              {/*<span className="focus-input100"></span>*/}
-                {/*<span className="symbol-input100">*/}
-                  {/*<i className="fa fa-birthday-cake" aria-hidden="true"></i>*/}
-                {/*</span>*/}
-              {/*</span>*/}
-          {/*</div>*/}
-
-          {/*<InputGroup style={{display: 'flex', flexDirection: 'column'}}>*/}
-            {/*<Input class={'form-control input'} id={'preregister-input1'} type='text' maxLength='20' placeholder='이메일 (example@gmail.com)' onChange={this.handleChange} />*/}
-            {/*<p style={{fontSize: '12px', fontWeight: 'lighter', marginLeft: '39em'}}>*유튜브 채널 계정과 일치해야 사전등록 혜택을 받을 수 있습니다.</p>*/}
-            {/*/!*<Button style={{marginLeft: '1em'}} className='verify' type='button' color={'primary'} onClick={this.handleClick_email}>인증코드 전송</Button>*!/*/}
-          {/*</InputGroup>*/}
+          <input name={'name'} value={name} className={'prereg-input'} placeholder={'이름'} onChange={e => this.handleChange(e)} />
 
           <div style={{width: '100%'}}>
-            <input className={'prereg-input'} placeholder={'이메일'} />
+            <input name={'email'} value={email} className={'prereg-input'} placeholder={'이메일'} onChange={e => this.handleChange(e)} />
             <p style={{fontSize: '12px', fontWeight: 'lighter', float: 'right'}}>*유튜브 채널 계정과 일치해야 사전등록 혜택을 받을 수 있습니다.</p>
           </div>
 
-          <input className={'prereg-input'} placeholder={'유튜브 채널 이름'} />
-
-          {/*<div>*/}
-            {/*<div className='email'>*/}
-                {/*<span className='snu-email'><input name='email' className='email-add' type='text' placeholder='이메일' onChange={this.handleChange} />*/}
-                  {/*<span className="focus-input100"></span>*/}
-                  {/*<span className="symbol-input100">*/}
-                    {/*<i className="fa fa-envelope" aria-hidden="true"></i>*/}
-                  {/*</span>*/}
-                {/*</span>*/}
-              {/*<button className='verify' type='button' onClick={this.handleClick_email}>인증코드 전송</button>*/}
-            {/*</div>*/}
-            {/*{emailUI()}*/}
-          {/*</div>*/}
-
-          {/*<InputGroup className={'name'}>*/}
-            {/*<InputGroupAddon addonType={'prepend'}>*/}
-              {/*<InputGroupText><i className="fa fa-id-card-o" aria-hidden="true"></i></InputGroupText>*/}
-            {/*</InputGroupAddon>*/}
-            {/*<Input class={'form-control input'} id={'preregister-input'} name='id' type='text' maxLength='20' placeholder='유튜브 채널 이름' onChange={this.handleChange} />*/}
-          {/*</InputGroup>*/}
+          <input name={'channelname'} value={youtubeChannelName} className={'prereg-input'} placeholder={'유튜브 채널 이름'} onChange={e => this.handleChange(e)} />
 
           <div style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
-            <input className={'prereg-input'} style={{width: '50%'}} type={'number'} placeholder={'구독자 수'} />
+            <input name={'subscribercount'} value={subscriberCount} className={'prereg-input'} style={{width: '50%'}} type={'number'} placeholder={'구독자 수'} onChange={e => this.handleChange(e)} />
             <br />&nbsp;
-            <select className={'prereg-input'} id={'mySelect'} style={{backgroundColor: 'white', color: '#F57A9E'}} placeholder={'컨텐츠 카테고리'}>
-              <option>카테고리</option>
-              <option>엔터테인먼트</option>
-              <option>인물 & 블로그</option>
-              <option>음악</option>
-              <option>스타일 & 패션</option>
+            <select name={'category'} value={category} className={'prereg-input'} id={'mySelect'} style={{backgroundColor: 'white', color: '#F57A9E'}} placeholder={'컨텐츠 카테고리'} onChange={e => this.handleChange(e)}>
+              <option value={100}>카테고리를 선택해 주세요.</option>
+              {Constants.CATEGORIES.map(c => (
+                <option key={c} value={c}>{CATEGORY_TYPE_STRINGS[c]}</option>
+              ))}
             </select>
           </div>
 
-          {/*<InputGroup className={'name'}>*/}
-            {/*<InputGroupAddon addonType={'prepend'}>*/}
-              {/*<InputGroupText><i className="fa fa-venus-mars" aria-hidden="true"></i></InputGroupText>*/}
-            {/*</InputGroupAddon>*/}
-            {/*<Input className='id-input' name='id' type='select' maxLength='20' placeholder='성별' onChange={this.handleChange}>*/}
-              {/*<option>성별</option>*/}
-              {/*<option>남</option>*/}
-              {/*<option>녀</option>*/}
-              {/*<option>밝히고 싶지 않음</option>*/}
-            {/*</Input>*/}
-          {/*</InputGroup>*/}
-
-          {/*<InputGroup className={'name'}>*/}
-            {/*<InputGroupAddon addonType={'prepend'}>*/}
-              {/*<InputGroupText><i className="fa fa-align-justify" aria-hidden="true"></i></InputGroupText>*/}
-            {/*</InputGroupAddon>*/}
-            {/*<Input class={'form-control input'} id={'preregister-input'} name='id' type='select' maxLength='20' placeholder='컨텐츠 카테고리' onChange={this.handleChange}>*/}
-              {/*<option>컨텐츠 카테고리</option>*/}
-              {/*<option>1</option>*/}
-              {/*<option>2</option>*/}
-              {/*<option>3</option>*/}
-            {/*</Input>*/}
-          {/*</InputGroup>*/}
-
-          {/*<InputGroup className={'name'}>*/}
-            {/*<InputGroupAddon addonType={'prepend'}>*/}
-              {/*<InputGroupText><i className="fa fa-users" aria-hidden="true"></i></InputGroupText>*/}
-            {/*</InputGroupAddon>*/}
-            {/*<Input class={'form-control input'} id={'preregister-input'} name='id' type='select' maxLength='20' placeholder='구독자 수' onChange={this.handleChange}>*/}
-              {/*<option>구독자 수</option>*/}
-              {/*<option>1</option>*/}
-              {/*<option>2</option>*/}
-              {/*<option>3</option>*/}
-            {/*</Input>*/}
-          {/*</InputGroup>*/}
-
-          {/*<InputGroup className={'name'}>*/}
-            {/*<InputGroupAddon addonType={'prepend'}>*/}
-              {/*<InputGroupText><i className="fa fa-link" aria-hidden="true"></i></InputGroupText>*/}
-            {/*</InputGroupAddon>*/}
-          {/*<select className={'prereg-input'} type={'url'} placeholder={'유튜브 채널 URL'} />*/}
-          <select className={'prereg-input'} id={'mySelect'} style={{backgroundColor: 'white', color: '#F57A9E'}} onChange={e => this.setState({group: e.target.value})} placeholder={'소속'}>
-            <option value={1}>개인</option>
-            <option value={2}>MCN</option>
-            <option value={3}>그룹</option>
+          <select name={'affiliation'} value={affiliation} className={'prereg-input'} id={'mySelect'} style={{backgroundColor: 'white', color: '#F57A9E'}} onChange={e => this.handleChange(e)} placeholder={'소속'}>
+            <option value={100}>소속을 선택해 주세요.</option>
+            {Constants.AFFILIATIONS.map(a => (
+              <option key={a} value={a}>{AFFILIATION_TYPE_STRINGS[a]}</option>
+            ))}
           </select>
           {
-            (+this.state.group === 2 || +this.state.group === 3) &&
-              <input className={'prereg-input'} placeholder={'소속 단체 이름'} />
+            (+this.state.affiliation === Constants.AFFILIATION_MCN || +this.state.affiliation === Constants.AFFILIATION_GROUP) &&
+              <input name={'affiliatedwith'} value={affiliatedWith} className={'prereg-input'} placeholder={'소속 단체 이름'} onChange={e => this.handleChange(e)} />
           }
-          <input className={'prereg-input'} type={'url'} placeholder={'유튜브 채널 URL'} />
-          {/*</InputGroup>*/}
+          <input name={'youtubeURL'} value={youtubeChannelURL} className={'prereg-input'} type={'url'} placeholder={'유튜브 채널 URL'} onChange={e => this.handleChange(e)} />
           <br />
           <div style={{width: '100%'}}>
             <div style={{float: 'left'}}>
               <h6>
-                <a style={{fontWeight: 'bolder'}}>개인정보 이용약관</a>
+                <span style={{fontWeight: 'bolder'}}>개인정보 이용약관</span>
                 &nbsp;
-                <span style={{color: 'red', fontWeight: 'lighter', fontSize: '12px', textDecoration: 'underline'}} onClick={this.toggle}>(필수)</span>
+                <a href={'#'} style={{color: 'red', fontWeight: 'lighter', fontSize: '12px', textDecoration: 'underline'}} onClick={this.toggle}>(필수)</a>
                 </h6>
-              <input type={'radio'} /> &nbsp; <span style={{fontSize: '12px', fontWeight: 'lighter'}}>개인정보 이용약관에 동의합니다.</span>
+              <input type={'radio'} onChange={e => this.setState({agreedToTerms: e.target.checked})} /> &nbsp; <span style={{fontSize: '12px', fontWeight: 'lighter'}}>개인정보 이용약관에 동의합니다.</span>
             </div>
           </div>
           <br />
-          <button className='sign-up-button' style={{backgroundColor: '#F57A9E'}} type='button' onClick={() => alert('죄송합니다. 현재는 사전등록 기간이 아닙니다.')}>사전등록</button>
+          <button className='sign-up-button' style={{backgroundColor: '#F57A9E'}} type='button' onClick={() => this.handleClick()}>사전등록</button>
 
           <Modal size={'lg'} isOpen={this.state.modalOpen} toggle={this.toggle}>
             <ModalHeader>
@@ -379,4 +229,4 @@ class SignUp extends Component{
 
 
 
-export default SignUp
+export default PreRegister

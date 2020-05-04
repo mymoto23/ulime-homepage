@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
-import './Signup.css'
+import '../style.css';
 
-class SignUp extends Component{
+class IntroLast extends Component{
 
   render(){
     return (
@@ -32,4 +32,4 @@ class SignUp extends Component{
 
 
 
-export default SignUp
+export default IntroLast

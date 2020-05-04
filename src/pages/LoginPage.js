@@ -1,9 +1,9 @@
 import React from 'react';
-import LoginContainer from '../containers/LoginContainer';
+import Login from "../components/Login";
 
 const LoginPage = ({history}) => {
   return(
-    <LoginContainer
+    <Login
       history={history}
     />
   );

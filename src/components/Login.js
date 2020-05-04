@@ -1,10 +1,9 @@
 import React, {Component} from 'react'
-import PropTypes from 'prop-types'
-import {Button, Col, Input, Row} from "reactstrap";
+import {Col, Row} from "reactstrap";
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import globe from "../../static/globeicon.png";
-import info from '../../static/infoicon.png';
-import click from '../../static/clickicon.png';
+import globe from "../static/globeicon.png";
+import info from '../static/infoicon.png';
+import click from '../static/clickicon.png';
 
 
 class Login extends Component {
@@ -103,11 +102,5 @@ class Login extends Component {
     )
   }
 }
-
-Login.propTypes = {
-  loginRequest: PropTypes.func,
-  isFetching: PropTypes.bool,
-  authenticated: PropTypes.bool,
-};
 
 export default Login

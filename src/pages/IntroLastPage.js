@@ -1,7 +1,7 @@
 import React from 'react';
-import SignUp from "../components/SignUp";
+import SignUp from "../components/IntroLast";
 
-const SignupPage = ({history}) => {
+const IntroLastPage = ({history}) => {
     return(
         <SignUp
             history={history}
@@ -9,4 +9,4 @@ const SignupPage = ({history}) => {
     );
 };
 
-export default SignupPage;
+export default IntroLastPage;

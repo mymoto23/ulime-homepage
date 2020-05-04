@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
-import {ListGroupItem, ListGroup, CardBody, Card} from "reactstrap";
+import {Card, CardBody, ListGroup, ListGroupItem} from "reactstrap";
 import UncontrolledCollapse from "reactstrap/es/UncontrolledCollapse";
 import arrowdown from '../static/arrowdown.png';
-import arrowup from '../static/arrowup.png';
 
 class FAQ extends Component {
   constructor(props) {

@@ -1,29 +1,7 @@
 import React, {Component} from 'react';
-import {
-  Badge,
-  Collapse, DropdownItem, DropdownMenu,
-  DropdownToggle,
-  Nav, Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  NavItem,
-  NavLink,
-  UncontrolledDropdown
-} from "reactstrap";
-import ulime from '../../static/ulime.png'
+import {Badge, Nav, Navbar, NavbarBrand, NavItem, NavLink} from "reactstrap";
 
 class MyNavBar extends Component {
-    state = {
-      isOpen: false,
-      loggedIn: !!sessionStorage.getItem('token'),
-    };
-
-  toggle() {
-    this.setState({
-      isOpen: !this.state.isOpen
-    });
-  }
-
   scrollToBottom = () => {
     if (this.props.height && this.props.height < 2500) {
       window.scrollTo({top: 5000, bottom: 0, behavior: 'smooth'});
@@ -31,19 +9,6 @@ class MyNavBar extends Component {
       window.scrollTo({top: this.props.height, bottom: 0, behavior: 'smooth'});
     }
   };
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.token || sessionStorage.getItem('token')) {
-      this.setState({loggedIn: true});
-    } else {
-      this.setState({loggedIn: false});
-    }
-  }
-
-  handleLogOut() {
-    sessionStorage.clear();
-    alert('로그아웃 되었습니다');
-  }
 
   render() {
     return(
@@ -61,18 +26,7 @@ class MyNavBar extends Component {
             {/*<NavItem className={'navbar-item'}>*/}
               {/*<NavLink style={{color: 'grey'}} href="/faq">FAQ</NavLink>*/}
             {/*</NavItem>*/}
-            {this.state.loggedIn ? <div style={{display: 'flex', justifyContent: 'center'}}>
-              <NavItem>
-                <NavLink href={'/message'}>쪽지함</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink href={'/mypage'}>내 정보</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink href={'/'} onClick={() => this.handleLogOut()}>로그아웃</NavLink>
-              </NavItem>
-              <span style={{marginTop: '8px'}}>{`${sessionStorage.getItem('name')} 님, 환영합니다!`}</span>
-            </div> :
+            {
               <div style={{display: 'flex', justifyContent: 'center'}}>
                 {/*<NavItem className={'navbar-item'}>*/}
                   {/*<NavLink style={{color: 'grey'}} onClick={this.scrollToBottom}>문의하기</NavLink>*/}

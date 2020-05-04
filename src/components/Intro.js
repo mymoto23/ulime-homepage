@@ -1,12 +1,11 @@
 import React, {Component} from 'react';
 import phone_creator from '../static/phone_creator.png';
 import phone_explore from '../static/phone_explore.png';
-import phone_feed from '../static/phone_feed.png';
 import phone_contents from '../static/phone_contents.png';
-import LoginPage from "../page/LoginPage";
+import LoginPage from "../pages/LoginPage";
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import LazyLoad from 'react-lazyload';
-import SignupPage from "../page/SignupPage";
+import IntroLastPage from "../pages/IntroLastPage";
 
 class Intro extends Component {
   constructor(props) {
@@ -134,7 +133,7 @@ class Intro extends Component {
             transitionEnter={true}
             transitionLeave={false}
           >
-            <SignupPage history={this.props.history} />
+            <IntroLastPage history={this.props.history} />
           </ReactCSSTransitionGroup>
         </LazyLoad>
       </div>
