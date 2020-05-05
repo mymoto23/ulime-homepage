@@ -42,7 +42,8 @@ class MainFooter extends Component {
           this.setState({title: '', email: '', content: ''});
         })
         .catch(err => {
-          alert(err.response.data.error)});
+          console.log(err);
+        });
     } catch(e) {
       alert(e);
     }
