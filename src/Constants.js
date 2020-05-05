@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:8000';
+export const API_URL = 'http://3.34.55.104:8000';
 
 export const CATEGORY_PEOPLE = 1;
 export const CATEGORY_MUSIC = 2;

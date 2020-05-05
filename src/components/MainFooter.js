@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import axios from 'axios';
+import * as Constants from '../Constants';
 
 class MainFooter extends Component {
   constructor(props) {
@@ -28,7 +29,7 @@ class MainFooter extends Component {
   };
 
   async handleClick() {
-    const URL = `http://localhost:8000/inquiry/`;
+    const URL = `${Constants.API_URL}/inquiry/`;
     const {title, content, email} = this.state;
     if (!title || !content || !email) {
       alert('제목, 이메일, 문의 내용을 입력해 주세요.');
