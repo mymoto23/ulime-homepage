@@ -99,7 +99,8 @@ class PreRegister extends Component{
           })
         })
         .catch(err => {
-          console.log(err);
+          console.log(err.response);
+          alert(err.response.data.error);
         });
     } catch (e) {
       alert(e.message);
